@@ -1,6 +1,7 @@
 const express = require('express');
 const connection = require("./banco_dados/database.js");
 const Pergunta = require("./banco_dados/Pergunta.js");
+const Resposta = require("./banco_dados/Resposta.js");
 
 const bodyparser = require('body-parser');
 
@@ -11,7 +12,7 @@ app.set('view engine','ejs');
 app.use(express.static('public'));
 
 app.use(bodyparser.urlencoded({extended:false}));
-app.use(bodyparser.json);
+app.use(bodyparser.json());
 
 //conexao ao banco de dados
 connection.authenticate().then(()=>{console.log("conectou")}).catch((msgErro)=>{console.log(msgErro)})
@@ -48,10 +49,23 @@ app.get("/pergunta/:id", (req,res)=>
     .then(perguntas =>
         {
             if(perguntas != undefined){
-                res.render("pergunta",{
+               
+                Resposta.findAll({
+                    where: {id :perguntas.id}
 
-                    perguntas:perguntas
-                });
+                   
+
+                }).then(respostas => {
+                        res.render("pergunta",{
+
+                        perguntas:perguntas,
+                        respostas : respostas
+                        });
+                   
+                })
+
+
+
             }else{
                 res.redirect("/");
             }
@@ -71,6 +85,21 @@ app.post("/salvapergunta", (req,res)=>
         })
 });
 
+
+
+app.post("/salvaresposta",(req,res)=>
+{
+    var resp = req.body.resp;
+    var perg = req.body.perg;
+
+    Resposta.create(
+        {
+            resp:resp,
+            pergunta_id:perg
+        }).then(()=>{
+            res.redirect("/pergunta/"+ perg);
+        })
+});
 app.listen(8888, ()=>
     {
         console.log("funcionando");
