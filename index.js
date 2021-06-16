@@ -16,10 +16,16 @@ app.use(bodyparser.json);
 //conexao ao banco de dados
 connection.authenticate().then(()=>{console.log("conectou")}).catch((msgErro)=>{console.log(msgErro)})
 
+
 app.get("/",(req, res)=>
 {
-    Pergunta.findAll({raw:true}).then(perguntas => {
-        res.render("index.ejs", {
+    Pergunta.findAll({raw:true,order:[
+        
+        ['titulo','ASC']
+    
+    
+        ]}).then(perguntas => {
+        res.render("index", {
             perguntas: perguntas
         });
     });
@@ -30,6 +36,26 @@ app.get("/",(req, res)=>
 app.get("/perguntar", (req,res)=>
 {
     res.render("perguntar.ejs");
+})
+
+app.get("/pergunta/:id", (req,res)=>
+{
+    var id = req.params.id;
+
+    Pergunta.findOne({
+        where: {id : id}
+    })
+    .then(perguntas =>
+        {
+            if(perguntas != undefined){
+                res.render("pergunta",{
+
+                    perguntas:perguntas
+                });
+            }else{
+                res.redirect("/");
+            }
+        });
 })
 
 app.post("/salvapergunta", (req,res)=>
