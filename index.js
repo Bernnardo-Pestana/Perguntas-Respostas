@@ -18,7 +18,12 @@ connection.authenticate().then(()=>{console.log("conectou")}).catch((msgErro)=>{
 
 app.get("/",(req, res)=>
 {
-    res.render("index.ejs");
+    Pergunta.findAll({raw:true}).then(perguntas => {
+        res.render("index.ejs", {
+            perguntas: perguntas
+        });
+    });
+  
 
 });
 
